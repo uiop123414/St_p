@@ -1,0 +1,50 @@
+from steam_parser import steam_parser
+from buff163.buff163_parser import buff163_parser
+from cs_money import cs_money_parser
+from Swappgg.swapgg_parser import swapgg_parser
+from market_cs_go.market_cs_go_parser import market_cs_go_parser
+from Loot_farm.Loot_farm_parser import loot_farm_parser
+from tabulate import tabulate
+import sys
+
+# @time_of_function
+def main(name):
+    st = steam_parser.steam_parser()
+    csm = cs_money_parser.csm_parser()
+    ltp = loot_farm_parser()
+    sgg = swapgg_parser("9f062b20-86d5-4317-a6b9-592d51db7610")
+    mcsgo = market_cs_go_parser("S5IFAIn7764TwE64b63AA8naY1p635L")
+    path = "buff163/"
+    
+    ls_fun_st = [st.get_lowest_price, st.auto_buy]
+    ls_fun = [buff163_parser(path),
+              csm, mcsgo, ltp, sgg]
+
+    for fun_st in ls_fun_st:
+        table = [[fun_st.__qualname__], [fun_st(name)]]
+        for fun in ls_fun:
+            table[0].append(type(fun).__name__)
+            table[1].append(fun.get_lowest_price(name))
+
+        print(tabulate(table))
+        table_compare = [[], []]
+        for fun in ls_fun:
+
+            table_compare[0].append("".join((fun_st.__name__, ' and ', type(fun).__name__)))
+            try:
+                table_compare[1].append((float(fun_st(name)[1:]) * 0.85 - float(fun.get_lowest_price(name)))
+                                        / float(fun.get_lowest_price(name)) * 100)
+            except TypeError:
+                table_compare[1].append(None)
+
+        print(tabulate(table_compare))
+
+    input()
+
+
+if __name__ == '__main__':
+    name = sys.argv[1]
+    #name = "P250 | Red Rock (Battle-Scarred)"
+    #name = "SSG 08 | Blood in the Water (Minimal Wear)"
+    # name = "SSG 08 | Prey (Factory New)"
+    main(name)
